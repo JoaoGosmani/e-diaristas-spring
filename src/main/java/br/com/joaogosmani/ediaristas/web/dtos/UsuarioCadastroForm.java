@@ -16,7 +16,7 @@ public class UsuarioCadastroForm {
     
     @NotNull
     @Size(min = 3, max = 255)
-    private String nome;
+    private String nomeCompleto;
 
     @NotNull
     @Size(min = 3, max = 255)
@@ -29,6 +29,6 @@ public class UsuarioCadastroForm {
 
     @NotNull
     @NotEmpty
-    private String confirmarSenha;
+    private String confirmacaoSenha;
 
 }
