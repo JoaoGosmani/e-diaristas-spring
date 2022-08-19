@@ -80,15 +80,13 @@ public class WebUsuarioService {
         repository.delete(usuario);
     }
 
-    public void validarCamposUnicos(Usuario usuario) {
-        repository.findByEmail(usuario.getEmail()).ifPresent((usuarioEncontrado) -> {
-            if (!usuarioEncontrado.equals(usuario)) {
-                var mensagem = "Já existe um usuário cadastrado com este e-mail";
-                var fieldError = new FieldError(usuario.getClass().getName(), "email", usuario.getEmail(), false, null, null, mensagem);
+    private void validarCamposUnicos(Usuario usuario) {
+        if (repository.isEmailJaCadastrado(usuario.getEmail(), usuario.getId())) {
+            var mensagem = "Já existe um usuário cadastrado com este e-mail";
+            var fieldError = new FieldError(usuario.getClass().getName(), "email", usuario.getEmail(), false, null, null, mensagem);
 
-                throw new UsuarioJaCadastradoException(mensagem, fieldError);
-            }
-        });
+            throw new UsuarioJaCadastradoException(mensagem, fieldError);
+        }
     }
 
 }
