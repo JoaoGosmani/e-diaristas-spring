@@ -8,11 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 
 import br.com.joaogosmani.ediaristas.core.enums.TipoUsuario;
+import br.com.joaogosmani.ediaristas.core.exceptions.SenhaIncorretaException;
 import br.com.joaogosmani.ediaristas.core.exceptions.SenhasNaoConferemException;
 import br.com.joaogosmani.ediaristas.core.exceptions.UsuarioJaCadastradoException;
 import br.com.joaogosmani.ediaristas.core.exceptions.UsuarioNaoEncontradoException;
 import br.com.joaogosmani.ediaristas.core.models.Usuario;
 import br.com.joaogosmani.ediaristas.core.repositories.UsuarioRepository;
+import br.com.joaogosmani.ediaristas.web.dtos.AlterarSenhaForm;
 import br.com.joaogosmani.ediaristas.web.dtos.UsuarioCadastroForm;
 import br.com.joaogosmani.ediaristas.web.dtos.UsuarioEdicaoForm;
 import br.com.joaogosmani.ediaristas.web.mappers.WebUsuarioMapper;
@@ -63,6 +65,13 @@ public class WebUsuarioService {
             .orElseThrow(() -> new UsuarioNaoEncontradoException(mensagem));
     }
 
+    public Usuario buscarPorEmail(String email) {
+        var mensagem = String.format("Usuário com email %s não encontrado", email);
+
+        return repository.findByEmail(email)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException(mensagem));
+    }
+
     public UsuarioEdicaoForm buscarFormPorId(Long id) {
         var usuario = buscarPorId(id);
 
@@ -86,6 +95,33 @@ public class WebUsuarioService {
        var usuario = buscarPorId(id);
 
         repository.delete(usuario);
+    }
+
+    public void alterarSenha(AlterarSenhaForm form, String email) {
+        var usuario = buscarPorEmail(email);
+
+        var senhaAtual = usuario.getSenha();
+        var senhaAntiga = form.getSenhaAntiga();
+        var senha = form.getSenha();
+        var confirmacaoSenha = form.getConfirmacaoSenha();
+
+        if (!senha.equals(confirmacaoSenha)) {
+            var mensagem = "Os dois campos de senha não conferem";
+            var fieldError = new FieldError(form.getClass().getName(), "confirmacaoSenha", form.getConfirmacaoSenha(), false, null, null, mensagem);
+        
+            throw new SenhasNaoConferemException(mensagem, fieldError);
+        }
+
+        if (!passwordEncoder.matches(senhaAntiga, senhaAtual)) {
+            var mensagem = "A senha antiga está incorreta";
+            var fieldError = new FieldError(form.getClass().getName(), "senhaAntiga", senhaAntiga, false, null, null, mensagem);
+        
+            throw new SenhaIncorretaException(mensagem, fieldError);
+        }
+
+        var novaSenhaHash = passwordEncoder.encode(senha);
+        usuario.setSenha(novaSenhaHash);
+        repository.save(usuario);
     }
 
     private void validarCamposUnicos(Usuario usuario) {
