@@ -12,7 +12,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UsuarioAutenticado  implements UserDetails {
+public class UsuarioAutenticado implements UserDetails {
 
     private Usuario usuario;
 
