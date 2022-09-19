@@ -10,10 +10,10 @@ import org.springframework.validation.FieldError;
 import br.com.joaogosmani.ediaristas.core.enums.TipoUsuario;
 import br.com.joaogosmani.ediaristas.core.exceptions.SenhaIncorretaException;
 import br.com.joaogosmani.ediaristas.core.exceptions.SenhasNaoConferemException;
-import br.com.joaogosmani.ediaristas.core.exceptions.UsuarioJaCadastradoException;
 import br.com.joaogosmani.ediaristas.core.exceptions.UsuarioNaoEncontradoException;
 import br.com.joaogosmani.ediaristas.core.models.Usuario;
 import br.com.joaogosmani.ediaristas.core.repositories.UsuarioRepository;
+import br.com.joaogosmani.ediaristas.core.validators.UsuarioValidator;
 import br.com.joaogosmani.ediaristas.web.dtos.AlterarSenhaForm;
 import br.com.joaogosmani.ediaristas.web.dtos.UsuarioCadastroForm;
 import br.com.joaogosmani.ediaristas.web.dtos.UsuarioEdicaoForm;
@@ -32,6 +32,9 @@ public class WebUsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UsuarioValidator validator;
+
     public List<Usuario> buscarTodos() {
         return repository.findAll();
     }
@@ -46,7 +49,7 @@ public class WebUsuarioService {
         model.setSenha(senhaHash);
         model.setTipoUsuario(TipoUsuario.ADMIN);
 
-        validarCamposUnicos(model);
+        validator.validar(model);
 
         return repository.save(model);
     }
@@ -79,7 +82,7 @@ public class WebUsuarioService {
         model.setSenha(usuario.getSenha());
         model.setTipoUsuario(usuario.getTipoUsuario());
 
-        validarCamposUnicos(model);
+        validator.validar(model);
 
         return repository.save(model);
     }
@@ -121,15 +124,6 @@ public class WebUsuarioService {
             var fieldError = new FieldError(obj.getClass().getName(), "confirmacaoSenha", obj.getConfirmacaoSenha(), false, null, null, mensagem);
         
             throw new SenhasNaoConferemException(mensagem, fieldError);
-        }
-    }
-
-    private void validarCamposUnicos(Usuario usuario) {
-        if (repository.isEmailJaCadastrado(usuario.getEmail(), usuario.getId())) {
-            var mensagem = "Já existe um usuário cadastrado com este e-mail";
-            var fieldError = new FieldError(usuario.getClass().getName(), "email", usuario.getEmail(), false, null, null, mensagem);
-
-            throw new UsuarioJaCadastradoException(mensagem, fieldError);
         }
     }
 
