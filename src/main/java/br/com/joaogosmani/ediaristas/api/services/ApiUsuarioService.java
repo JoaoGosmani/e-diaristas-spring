@@ -10,6 +10,7 @@ import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioResponse;
 import br.com.joaogosmani.ediaristas.api.mappers.ApiUsuarioMapper;
 import br.com.joaogosmani.ediaristas.core.exceptions.SenhasNaoConferemException;
 import br.com.joaogosmani.ediaristas.core.repositories.UsuarioRepository;
+import br.com.joaogosmani.ediaristas.core.services.storage.adapters.StorageService;
 import br.com.joaogosmani.ediaristas.core.validators.UsuarioValidator;
 
 @Service
@@ -27,6 +28,9 @@ public class ApiUsuarioService {
     @Autowired
     private UsuarioValidator validator;
 
+    @Autowired
+    private StorageService storageService;
+
     public UsuarioResponse cadastrarUsuario(UsuarioRequest request) {
         validarConfirmacaoSenha(request);
 
@@ -36,6 +40,9 @@ public class ApiUsuarioService {
 
         var senhaEncriptada = passwordEncoder.encode(usuarioParaCadastrar.getSenha());
         usuarioParaCadastrar.setSenha(senhaEncriptada);
+
+        var fotoDocumento = storageService.salvar(request.getFotoDocumento());
+        usuarioParaCadastrar.setFotoDocumento(fotoDocumento);
 
         var usuarioCadastrado = repository.save(usuarioParaCadastrar);
 
