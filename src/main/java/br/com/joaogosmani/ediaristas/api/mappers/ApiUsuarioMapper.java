@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import br.com.joaogosmani.ediaristas.api.dtos.requests.UsuarioRequest;
+import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioResponse;
 import br.com.joaogosmani.ediaristas.core.enums.TipoUsuario;
 import br.com.joaogosmani.ediaristas.core.models.Usuario;
 
@@ -17,6 +18,9 @@ public interface ApiUsuarioMapper {
 
     @Mapping(target = "senha", source = "password")
     Usuario toModel(UsuarioRequest request);
+
+    @Mapping(target = "tipoUsuario", source = "tipoUsuario.id")
+    UsuarioResponse toResponse(Usuario model);
 
     default TipoUsuario integerToTipoUsuario(Integer valor) {
         return Stream.of(TipoUsuario.values())
