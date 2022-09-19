@@ -15,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import br.com.joaogosmani.ediaristas.core.validators.Idade;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -52,6 +53,7 @@ public class UsuarioRequest {
 
     @NotNull
     @Past
+    @Idade(min = 18, max = 100)
     @DateTimeFormat(iso = ISO.DATE)
     private LocalDate nascimento;
 
