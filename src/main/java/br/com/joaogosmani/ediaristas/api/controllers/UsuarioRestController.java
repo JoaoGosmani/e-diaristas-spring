@@ -24,7 +24,7 @@ public class UsuarioRestController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public UsuarioResponse cadastrar(@ModelAttribute @Valid UsuarioRequest request) {
-        return service.cadastrarUsuario(request);
+        return service.cadastrar(request);
     }
     
 }
