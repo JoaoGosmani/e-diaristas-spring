@@ -6,4 +6,8 @@ public interface TokenService {
 
     String getSubjectDoAccessToken(String accessToken);
 
+    String gerarRefreshToken(String subject);
+
+    String getSubjectDoRefreshToken(String refreshToken);
+
 }
