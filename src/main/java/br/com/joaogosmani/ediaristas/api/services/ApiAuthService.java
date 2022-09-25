@@ -56,4 +56,9 @@ public class ApiAuthService {
         return new TokenResponse(access, refresh);
     }
 
+    public void logout(RefreshRequest refreshRequest) {
+        var token = refreshRequest.getRefresh();
+        tokenBlackListService.colocarTokenNaBlackList(token);
+    }
+
 }
