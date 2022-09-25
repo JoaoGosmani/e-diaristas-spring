@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import br.com.joaogosmani.ediaristas.api.dtos.requests.RefreshRequest;
 import br.com.joaogosmani.ediaristas.api.dtos.requests.TokenRequest;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.TokenResponse;
+import br.com.joaogosmani.ediaristas.core.services.TokenBlackListService;
 import br.com.joaogosmani.ediaristas.core.services.token.adapters.TokenService;
 
 @Service
@@ -22,6 +23,9 @@ public class ApiAuthService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private TokenBlackListService tokenBlackListService;
 
     public TokenResponse autenticar(TokenRequest tokenRequest) {
         var email = tokenRequest.getEmail();
@@ -37,12 +41,17 @@ public class ApiAuthService {
     }
 
     public TokenResponse reautenticar(RefreshRequest refreshRequest) {
-        var email = tokenService.getSubjectDoRefreshToken(refreshRequest.getRefresh());
+        var token = refreshRequest.getRefresh();
+        tokenBlackListService.verificarToken(token);
+
+        var email = tokenService.getSubjectDoRefreshToken(token);
 
         userDetailsService.loadUserByUsername(email);
 
         var access = tokenService.gerarAccessToken(email);
         var refresh = tokenService.gerarRefreshToken(email);
+
+        tokenBlackListService.colocarTokenNaBlackList(token);
 
         return new TokenResponse(access, refresh);
     }
