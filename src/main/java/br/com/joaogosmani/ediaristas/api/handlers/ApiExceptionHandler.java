@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,14 +35,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleEnderecoServiceException(
         EnderecoServiceException exception, HttpServletRequest request
     ) {
-        var errorResponse = ErrorResponse.builder()
-            .status(400)
-            .timestamp(LocalDateTime.now())
-            .mensagem(exception.getLocalizedMessage())
-            .path(request.getRequestURI())
-            .build();
-
-            return ResponseEntity.badRequest().body(errorResponse);
+        return criarErrorResponse(HttpStatus.BAD_REQUEST, exception.getLocalizedMessage(), request.getRequestURI());
     }
     
     @ExceptionHandler(ValidacaoException.class)
@@ -62,30 +56,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleTokenServiceException(
         TokenServiceException exception, HttpServletRequest request
     ) {
-        var status = HttpStatus.UNAUTHORIZED;
-        var errorResponse = ErrorResponse.builder()
-            .status(status.value())
-            .timestamp(LocalDateTime.now())
-            .mensagem(exception.getLocalizedMessage())
-            .path(request.getRequestURI())
-            .build();
-
-        return new ResponseEntity<Object>(errorResponse, status);
+        return criarErrorResponse(HttpStatus.UNAUTHORIZED, exception.getLocalizedMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(TokenNaBlackListException.class)
     public ResponseEntity<Object> handleNaBlackListException(
         TokenNaBlackListException exception, HttpServletRequest request
     ) {
-        var status = HttpStatus.UNAUTHORIZED;
-        var errorResponse = ErrorResponse.builder()
-            .status(status.value())
-            .timestamp(LocalDateTime.now())
-            .mensagem(exception.getLocalizedMessage())
-            .path(request.getRequestURI())
-            .build();
-
-        return new ResponseEntity<Object>(errorResponse, status);
+        return criarErrorResponse(HttpStatus.UNAUTHORIZED, exception.getLocalizedMessage(), request.getRequestURI());
     }
 
     @Override
@@ -93,6 +71,16 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         MethodArgumentNotValidException exception,
         HttpHeaders headers, 
         HttpStatus status, 
+        WebRequest request
+    ) {
+        return handleBindException(exception, headers, status, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleBindException(
+        BindException exception, 
+        HttpHeaders headers, 
+        HttpStatus status,
         WebRequest request
     ) {
         var body = new HashMap<String, List<String>>();
@@ -112,6 +100,17 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             });
 
         return ResponseEntity.badRequest().body(body);
+    }
+
+    private ResponseEntity<Object> criarErrorResponse(HttpStatus status, String mensagem, String path) {
+        var errorResponse = ErrorResponse.builder()
+            .status(status.value())
+            .timestamp(LocalDateTime.now())
+            .mensagem(mensagem)
+            .path(path)
+            .build();
+
+        return new ResponseEntity<>(errorResponse, status);
     }
 
 }
