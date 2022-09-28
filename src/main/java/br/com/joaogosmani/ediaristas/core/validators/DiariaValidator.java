@@ -76,6 +76,21 @@ public class DiariaValidator {
 
             throw new ValidacaoException(mensagem, fieldError);
         }
+
+        validarCodigoIbge(diaria);
+    }
+
+    private void validarCodigoIbge(Diaria diaria) {
+        var cep = diaria.getCep();
+        var codigoIbge = diaria.getCodigoIbge();
+        var codigoIbgeValido = enderecoService.buscarEnderecoPorCep(cep).getIbge();
+
+        if (!codigoIbge.equals(codigoIbgeValido)) {
+            var mensagem = "código ibge inválido";
+            var fieldError = new FieldError(diaria.getClass().getName(), "codigoIbge", diaria.getCodigoIbge(), false, null, null, mensagem);
+
+            throw new ValidacaoException(mensagem, fieldError);
+        }
     }
 
     private BigDecimal calcularValorTotal(Diaria diaria) {
@@ -92,7 +107,7 @@ public class DiariaValidator {
         var valorTotal = valorQuarto.add(valorSala)
             .add(valorCozinha)
             .add(valorBanheiro)
-            .add(valorQuarto)
+            .add(valorQuintal)
             .add(valorOutros); 
 
         if (valorTotal.compareTo(valorMinimo) < 0) {
