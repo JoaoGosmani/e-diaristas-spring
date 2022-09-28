@@ -11,25 +11,23 @@ import javax.validation.Payload;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = IdadeValidator.class)
-public @interface Idade {
+@Constraint(validatedBy = HoraDepoisDeValidator.class)
+public @interface HoraDepoisDe {
     
-    String message() default "deve ter entre {min} e {max} anos";
+    String message() default "a hora não pode ser menor que ${horaInicio}";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
 
-    int min() default 0;
+    int horaInicio() default 0;
 
-    int max() default Integer.MAX_VALUE;
-    
     @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE })
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
     @interface List {
 
-        Idade[] value();
+        HoraDepoisDe[] value();
 
     }
 
