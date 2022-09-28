@@ -8,6 +8,7 @@ import org.springframework.validation.FieldError;
 
 import br.com.joaogosmani.ediaristas.core.exceptions.ValidacaoException;
 import br.com.joaogosmani.ediaristas.core.models.Diaria;
+import br.com.joaogosmani.ediaristas.core.repositories.UsuarioRepository;
 import br.com.joaogosmani.ediaristas.core.services.consultaendereco.adapters.EnderecoService;
 import br.com.joaogosmani.ediaristas.core.services.consultaendereco.exceptions.EnderecoServiceException;
 
@@ -16,6 +17,9 @@ public class DiariaValidator {
     
     @Autowired
     private EnderecoService enderecoService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     public void validar(Diaria diaria) {
         validarHoraTermino(diaria);
@@ -90,6 +94,20 @@ public class DiariaValidator {
             var fieldError = new FieldError(diaria.getClass().getName(), "codigoIbge", diaria.getCodigoIbge(), false, null, null, mensagem);
 
             throw new ValidacaoException(mensagem, fieldError);
+        }
+
+        validarDisponibilidade(diaria);
+    }
+
+    private void validarDisponibilidade(Diaria diaria) {
+        var codigoIbge = diaria.getCodigoIbge();
+        var disponibilidade = usuarioRepository.existsByCidadesAtendidasCodigoIbge(codigoIbge);
+
+        if (!disponibilidade) {
+            var mensagem = "não há diaristas que atendam ao cep informado";
+            var fieldError = new FieldError(diaria.getClass().getName(), "cep", diaria.getCep(), false, null, null, mensagem);
+
+            throw new ValidacaoException(mensagem, fieldError);    
         }
     }
 
