@@ -2,18 +2,22 @@ package br.com.joaogosmani.ediaristas.api.dtos.responses;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import br.com.joaogosmani.ediaristas.core.enums.TipoUsuario;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @JsonNaming(SnakeCaseStrategy.class)
-public class UsuarioResponse {
+public class UsuarioResponse extends HateoasResponse {
     
     private Long id;
 
@@ -30,5 +34,10 @@ public class UsuarioResponse {
     private String telefone;
 
     private String chavePix;
+
+    @JsonIgnore
+    public Boolean isCliente() {
+        return tipoUsuario.equals(TipoUsuario.CLIENTE.getId());
+    }
 
 }
