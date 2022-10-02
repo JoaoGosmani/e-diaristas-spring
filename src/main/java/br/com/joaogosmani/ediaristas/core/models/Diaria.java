@@ -120,5 +120,9 @@ public class Diaria extends Auditable {
         inverseJoinColumns = @JoinColumn(name = "candidato_id")
     )
     private List<Usuario> candidatos;
+    
+    public Boolean isSemPagamento() {
+        return status.equals(DiariaStatus.SEM_PAGAMENTO);
+    }
 
 }
