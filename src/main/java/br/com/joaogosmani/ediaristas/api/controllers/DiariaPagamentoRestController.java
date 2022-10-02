@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.joaogosmani.ediaristas.api.dtos.requests.PagamentoRequest;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.MensagemResponse;
 import br.com.joaogosmani.ediaristas.api.services.ApiDiariaPagamentoService;
+import br.com.joaogosmani.ediaristas.core.permissions.EDiaristasPermissions;
 
 @RestController
 @RequestMapping("/api/diarias/{id}")
@@ -20,6 +21,7 @@ public class DiariaPagamentoRestController {
     @Autowired
     private ApiDiariaPagamentoService service;
 
+    @EDiaristasPermissions.isClienteDaDiaria
     @PostMapping("/pagar")
     public MensagemResponse pagar(@RequestBody @Valid PagamentoRequest request, @PathVariable Long id) {
         return service.pagar(request, id);
