@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import br.com.joaogosmani.ediaristas.api.controllers.DiariaPagamentoRestController;
+import br.com.joaogosmani.ediaristas.api.controllers.DiariaRestController;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.DiariaResponse;
 import br.com.joaogosmani.ediaristas.core.utils.SecurityUtils;
 
@@ -20,14 +21,20 @@ public class DiariaAssembler implements Assembler<DiariaResponse> {
 
     @Override
     public void adicionarLinks(DiariaResponse resource) {
+        var id = resource.getId();
         if (securityUtils.isCliente() && resource.isSemPagamento()) {
-            var id = resource.getId();
             var pagarDiariaLink = linkTo(methodOn(DiariaPagamentoRestController.class).pagar(null, id))
                 .withRel("pagar_diaria")
                 .withType("POST");
 
             resource.adicionarLinks(pagarDiariaLink);
         }  
+
+        var selfLink = linkTo(methodOn(DiariaRestController.class).buscarPorId(id))
+            .withSelfRel()
+            .withType("GET");
+
+            resource.adicionarLinks(selfLink);
     }
 
     @Override
