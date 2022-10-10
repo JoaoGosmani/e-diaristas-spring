@@ -10,6 +10,7 @@ import br.com.joaogosmani.ediaristas.api.dtos.requests.DiariaRequest;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.DiariaResponse;
 import br.com.joaogosmani.ediaristas.api.mappers.ApiDiariaMapper;
 import br.com.joaogosmani.ediaristas.core.enums.DiariaStatus;
+import br.com.joaogosmani.ediaristas.core.exceptions.DiariaNaoEncontradaException;
 import br.com.joaogosmani.ediaristas.core.models.Diaria;
 import br.com.joaogosmani.ediaristas.core.repositories.DiariaRepository;
 import br.com.joaogosmani.ediaristas.core.utils.SecurityUtils;
@@ -58,6 +59,18 @@ public class ApiDiariaService {
         return diarias.stream()
             .map(mapper::toResponse)
             .toList();
+    }
+
+    public DiariaResponse buscarPorId(Long id) {
+        var diaria = buscarDiariaPorDiaria(id);
+
+        return mapper.toResponse(diaria);
+    }
+
+    private Diaria buscarDiariaPorDiaria(Long id) {
+        var mensagem = String.format("Diária com id %d não encontrada", id);
+        return repository.findById(id)
+            .orElseThrow(() -> new DiariaNaoEncontradaException(mensagem));
     }
 
     private BigDecimal calcularComissao(Diaria model) {
