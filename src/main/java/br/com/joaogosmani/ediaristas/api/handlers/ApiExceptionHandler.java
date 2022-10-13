@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 import br.com.joaogosmani.ediaristas.api.dtos.responses.ErrorResponse;
 import br.com.joaogosmani.ediaristas.core.exceptions.TokenNaBlackListException;
 import br.com.joaogosmani.ediaristas.core.exceptions.ValidacaoException;
+import br.com.joaogosmani.ediaristas.core.services.consultacidade.exceptions.ConsultaCidadeException;
 import br.com.joaogosmani.ediaristas.core.services.consultaendereco.exceptions.EnderecoServiceException;
 import br.com.joaogosmani.ediaristas.core.services.token.exceptions.TokenServiceException;
 
@@ -70,6 +71,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFoundException(
         EntityNotFoundException exception, HttpServletRequest request
+    ) {
+        return criarErrorResponse(HttpStatus.NOT_FOUND, exception.getLocalizedMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(ConsultaCidadeException.class)
+    public ResponseEntity<Object> handleConsultaCidadeException(
+        ConsultaCidadeException exception, HttpServletRequest request
     ) {
         return criarErrorResponse(HttpStatus.NOT_FOUND, exception.getLocalizedMessage(), request.getRequestURI());
     }
