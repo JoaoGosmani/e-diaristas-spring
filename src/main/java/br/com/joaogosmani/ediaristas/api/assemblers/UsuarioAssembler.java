@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import br.com.joaogosmani.ediaristas.api.controllers.CidadesAtendidasRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.DiariaRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.EnderecoDiaristaRestController;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioResponse;
@@ -31,7 +32,15 @@ public class UsuarioAssembler implements Assembler<UsuarioResponse> {
                 .withRel("listar_endereco")
                 .withType("GET");
 
-            resource.adicionarLinks(atualizarEnderecoLink, listarEnderecoLink);
+            var relacionarCidadesLink = linkTo(methodOn(CidadesAtendidasRestController.class).atualizarCidadesAtendidas(null))
+                .withRel("relacionar_cidades")
+                .withType("PUT");
+
+            var cidadesAtendidasLink = linkTo(methodOn(CidadesAtendidasRestController.class).listarCidadesAtendidas())
+                .withRel("cidades_atendidas")
+                .withType("GET");
+
+            resource.adicionarLinks(atualizarEnderecoLink, listarEnderecoLink, relacionarCidadesLink, cidadesAtendidasLink);
         }
 
         var listaDiariasLink = linkTo(methodOn(DiariaRestController.class).listarPorUsuarioLogado())
@@ -42,8 +51,6 @@ public class UsuarioAssembler implements Assembler<UsuarioResponse> {
     }
 
     @Override
-    public void adicionarLinks(List<UsuarioResponse> collectionResource) {
-        
-    }
+    public void adicionarLinks(List<UsuarioResponse> collectionResource) {}
     
 }
