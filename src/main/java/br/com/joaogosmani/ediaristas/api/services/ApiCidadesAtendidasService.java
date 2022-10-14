@@ -1,12 +1,20 @@
 package br.com.joaogosmani.ediaristas.api.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.joaogosmani.ediaristas.api.dtos.requests.CidadesAtendidasRequest;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.CidadeAtendidaResponse;
+import br.com.joaogosmani.ediaristas.api.dtos.responses.MensagemResponse;
 import br.com.joaogosmani.ediaristas.api.mappers.ApiCidadeAtendidaMapper;
+import br.com.joaogosmani.ediaristas.core.exceptions.CidadeAtendidaNaoEncontradaException;
+import br.com.joaogosmani.ediaristas.core.models.CidadeAtendida;
+import br.com.joaogosmani.ediaristas.core.repositories.CidadeAtendidaRepository;
+import br.com.joaogosmani.ediaristas.core.repositories.UsuarioRepository;
+import br.com.joaogosmani.ediaristas.core.services.consultacidade.adapters.ConsultaCidadeService;
 import br.com.joaogosmani.ediaristas.core.utils.SecurityUtils;
 
 @Service
@@ -17,6 +25,15 @@ public class ApiCidadesAtendidasService {
 
     @Autowired
     private ApiCidadeAtendidaMapper mapper;
+
+    @Autowired
+    private CidadeAtendidaRepository repository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ConsultaCidadeService consultaCidadeService;
     
     public List<CidadeAtendidaResponse> listarCidadesAtendidas() {
         return securityUtils.getUsuarioLogado()
@@ -25,5 +42,45 @@ public class ApiCidadesAtendidasService {
             .map(mapper::toResponse)
             .toList();
     }
-    
+
+    public MensagemResponse atualizarCidadesAtendidas(CidadesAtendidasRequest request) {
+        var usuarioLogado = securityUtils.getUsuarioLogado();
+        var cidadesAtendidas = new ArrayList<CidadeAtendida>();
+
+        request.getCidades().forEach(cidadeAtendidaRequest -> {
+            var codigoIbge = cidadeAtendidaRequest.getCodigoIbge();
+
+            CidadeAtendida cidadeAtendida;
+            try {
+                cidadeAtendida = buscarCidadeAtendidaPorCodigoIbge(codigoIbge);
+            } catch (CidadeAtendidaNaoEncontradaException exception) {
+                cidadeAtendida = cadastrarCidadeAtendida(codigoIbge);
+            }
+            
+            cidadesAtendidas.add(cidadeAtendida);
+        });
+
+        usuarioLogado.setCidadesAtendidas(cidadesAtendidas);
+        usuarioRepository.save(usuarioLogado);
+
+        return new MensagemResponse("Cidades atendidas atualizadas com sucesso!");
+    }
+
+    private CidadeAtendida cadastrarCidadeAtendida(String codigoIbge) {
+        var cidade = consultaCidadeService.buscarCidadePorCodigoIbge(codigoIbge);
+
+        var cidadeAtendida = new CidadeAtendida();
+        cidadeAtendida.setCodigoIbge(codigoIbge);
+        cidadeAtendida.setCidade(cidade.getCidade());
+        cidadeAtendida.setEstado(cidade.getEstado());
+
+        return repository.save(cidadeAtendida);
+    }
+
+    private CidadeAtendida buscarCidadeAtendidaPorCodigoIbge(String codigoIbge) {
+        var mensagem = String.format("Cidade com código ibge %s não encontrada", codigoIbge);
+        return repository.findByCodigoIbge(codigoIbge)
+            .orElseThrow(() -> new CidadeAtendidaNaoEncontradaException(mensagem));
+    }
+
 }
