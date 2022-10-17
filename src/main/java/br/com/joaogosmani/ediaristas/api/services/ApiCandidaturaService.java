@@ -8,6 +8,7 @@ import br.com.joaogosmani.ediaristas.core.exceptions.DiariaNaoEncontradaExceptio
 import br.com.joaogosmani.ediaristas.core.models.Diaria;
 import br.com.joaogosmani.ediaristas.core.repositories.DiariaRepository;
 import br.com.joaogosmani.ediaristas.core.utils.SecurityUtils;
+import br.com.joaogosmani.ediaristas.core.validators.CandidaturaValidator;
 
 @Service
 public class ApiCandidaturaService {
@@ -18,8 +19,12 @@ public class ApiCandidaturaService {
     @Autowired
     private SecurityUtils securityUtils;
 
+    @Autowired
+    private CandidaturaValidator validator;
+
     public MensagemResponse candidatar(Long id) {
         var diaria = buscarDiariaPorId(id);
+        validator.validar(diaria);
         var usuarioLogado = securityUtils.getUsuarioLogado();
         diaria.getCandidatos().add(usuarioLogado);
         repository.save(diaria);
