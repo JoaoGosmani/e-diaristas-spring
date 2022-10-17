@@ -32,6 +32,6 @@ public interface DiariaRepository extends JpaRepository<Diaria, Long> {
             SIZE(d.candidatos) < 3
         """
     )
-    List<Diaria> findOportunidades(List<String> cidades, Usuario cadidato);
+    List<Diaria> findOportunidades(List<String> cidades, Usuario candidato);
 
 }
