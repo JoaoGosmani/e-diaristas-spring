@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.joaogosmani.ediaristas.core.services.consultacidade.adapters.ConsultaCidadeService;
 import br.com.joaogosmani.ediaristas.core.services.consultacidade.dtos.CidadeResponse;
-import br.com.joaogosmani.ediaristas.core.services.consultacidade.exceptions.ConsultaCidadeException;
+import br.com.joaogosmani.ediaristas.core.services.consultacidade.exceptions.ConsultaCidadeServiceException;
 
 @Service
 public class IbgeService implements ConsultaCidadeService {
@@ -25,7 +25,7 @@ public class IbgeService implements ConsultaCidadeService {
     private ObjectMapper objectMapper;
 
     @Override
-    public CidadeResponse buscarCidadePorCodigoIbge(String codigoIbge) throws ConsultaCidadeException {
+    public CidadeResponse buscarCidadePorCodigoIbge(String codigoIbge) throws ConsultaCidadeServiceException {
         var url = BASE_URL + "/localidades/municipios/" + codigoIbge;
         var response = clienteHttp.getForEntity(url, String.class);
         var jsonNode = getJsonNode(response);
@@ -51,7 +51,7 @@ public class IbgeService implements ConsultaCidadeService {
 
     private void validarJsonNode(JsonNode jsonNode) {
         if (jsonNode.path("nome").asText().isEmpty()) {
-            throw new ConsultaCidadeException("Cidade não encontrada");
+            throw new ConsultaCidadeServiceException("Cidade não encontrada");
         }
     }
 
@@ -59,9 +59,9 @@ public class IbgeService implements ConsultaCidadeService {
         try {
             return objectMapper.readTree(response.getBody());
         } catch (JsonMappingException e) {
-            throw new ConsultaCidadeException(e.getLocalizedMessage());
+            throw new ConsultaCidadeServiceException(e.getLocalizedMessage());
         } catch (JsonProcessingException e) {
-            throw new ConsultaCidadeException(e.getLocalizedMessage());
+            throw new ConsultaCidadeServiceException(e.getLocalizedMessage());
         }
     }
     
