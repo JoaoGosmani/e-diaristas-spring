@@ -10,6 +10,7 @@ import br.com.joaogosmani.ediaristas.core.exceptions.DiariaNaoEncontradaExceptio
 import br.com.joaogosmani.ediaristas.core.models.Avaliacao;
 import br.com.joaogosmani.ediaristas.core.models.Diaria;
 import br.com.joaogosmani.ediaristas.core.models.Usuario;
+import br.com.joaogosmani.ediaristas.core.publishers.NovaAvaliacaoPublisher;
 import br.com.joaogosmani.ediaristas.core.repositories.AvaliacaoRepository;
 import br.com.joaogosmani.ediaristas.core.repositories.DiariaRepository;
 import br.com.joaogosmani.ediaristas.core.utils.SecurityUtils;
@@ -33,6 +34,9 @@ public class ApiAvaliacaoService {
     @Autowired
     private AvaliacaoValidator validator;
 
+    @Autowired
+    private NovaAvaliacaoPublisher novaAvaliacaoPublisher;
+
     public MensagemResponse avaliarDiaria(AvaliacaoRequest request, Long id) {
         var diaria = buscarDiariaPorId(id);
         var avaliador = securityUtils.getUsuarioLogado();
@@ -44,7 +48,8 @@ public class ApiAvaliacaoService {
 
         validator.validar(model);
 
-        repository.save(model);
+        model = repository.save(model);
+        novaAvaliacaoPublisher.publish(model);
 
         return new MensagemResponse("Avaliação realizada com sucesso!");
     }
