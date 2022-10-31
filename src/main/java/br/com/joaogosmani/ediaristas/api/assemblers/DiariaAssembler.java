@@ -9,10 +9,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import br.com.joaogosmani.ediaristas.api.controllers.AvaliacaoRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.ConfirmacaoPresencaRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.DiariaPagamentoRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.DiariaRestController;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.DiariaResponse;
+import br.com.joaogosmani.ediaristas.core.repositories.AvaliacaoRepository;
 import br.com.joaogosmani.ediaristas.core.utils.SecurityUtils;
 
 @Component
@@ -20,6 +22,9 @@ public class DiariaAssembler implements Assembler<DiariaResponse> {
 
     @Autowired
     private SecurityUtils securityUtils;
+
+    @Autowired
+    private AvaliacaoRepository avaliacaoRepository;
 
     @Override
     public void adicionarLinks(DiariaResponse resource) {
@@ -38,6 +43,14 @@ public class DiariaAssembler implements Assembler<DiariaResponse> {
                 .withType("PATCH");
 
             resource.adicionarLinks(confirmarPresencaLink);
+        }
+
+        if (isAptaParaAvaliacao(resource)) {
+            var avaliacaoLink = linkTo(methodOn(AvaliacaoRestController.class).avaliarDiaria(null, id))
+                .withRel("avaliar_diaria")
+                .withType("PATCH");  
+
+            resource.adicionarLinks(avaliacaoLink);
         }
 
         var selfLink = linkTo(methodOn(DiariaRestController.class).buscarPorId(id))
@@ -61,6 +74,11 @@ public class DiariaAssembler implements Assembler<DiariaResponse> {
 
     private boolean isDataAtendimentoNoPassado(DiariaResponse resource) {
         return resource.getDataAtendimento().isBefore(LocalDateTime.now());
+    }
+
+    private boolean isAptaParaAvaliacao(DiariaResponse resource) {
+        return resource.isConcluido()
+            && !avaliacaoRepository.existsByAvaliadoraAndDiariaId(securityUtils.getUsuarioLogado(), resource.getId());
     }
     
 }
