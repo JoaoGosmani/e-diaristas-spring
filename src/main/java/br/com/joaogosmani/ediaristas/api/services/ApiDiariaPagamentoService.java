@@ -9,6 +9,7 @@ import br.com.joaogosmani.ediaristas.core.enums.DiariaStatus;
 import br.com.joaogosmani.ediaristas.core.exceptions.DiariaNaoEncontradaException;
 import br.com.joaogosmani.ediaristas.core.models.Diaria;
 import br.com.joaogosmani.ediaristas.core.repositories.DiariaRepository;
+import br.com.joaogosmani.ediaristas.core.services.gatewaypagamento.adapters.GatewayPagamentoService;
 import br.com.joaogosmani.ediaristas.core.validators.PagamentoValidator;
 
 @Service
@@ -20,15 +21,21 @@ public class ApiDiariaPagamentoService {
     @Autowired
     private PagamentoValidator validator;
 
+    @Autowired
+    private GatewayPagamentoService gatewayPagamentoService;
+
     public MensagemResponse pagar(PagamentoRequest request, Long id) {
         var diaria = buscarDiariaPorId(id);
 
         validator.validar(diaria);
 
-        diaria.setStatus(DiariaStatus.PAGO);
-        diariaRepository.save(diaria);
-
-        return new MensagemResponse("Diária paga com sucesso!");
+        var pagamento = gatewayPagamentoService.pagar(diaria, request.getCardHash());
+        if (pagamento.isAceito()) {
+            diaria.setStatus(DiariaStatus.PAGO);
+            diariaRepository.save(diaria);
+            return new MensagemResponse("Diária paga com sucesso!");
+        }
+        return new MensagemResponse("Pagamento recusado");
     }
 
     private Diaria buscarDiariaPorId(Long id) {
