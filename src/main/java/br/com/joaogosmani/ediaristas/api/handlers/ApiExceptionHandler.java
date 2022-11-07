@@ -26,6 +26,7 @@ import br.com.joaogosmani.ediaristas.core.exceptions.TokenNaBlackListException;
 import br.com.joaogosmani.ediaristas.core.exceptions.ValidacaoException;
 import br.com.joaogosmani.ediaristas.core.services.consultacidade.exceptions.ConsultaCidadeServiceException;
 import br.com.joaogosmani.ediaristas.core.services.consultaendereco.exceptions.EnderecoServiceException;
+import br.com.joaogosmani.ediaristas.core.services.gatewaypagamento.exceptions.GatewayPagamentoException;
 import br.com.joaogosmani.ediaristas.core.services.token.exceptions.TokenServiceException;
 
 @RestControllerAdvice(annotations = RestController.class)
@@ -80,6 +81,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ConsultaCidadeServiceException exception, HttpServletRequest request
     ) {
         return criarErrorResponse(HttpStatus.NOT_FOUND, exception.getLocalizedMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(GatewayPagamentoException.class)
+    public ResponseEntity<Object> handleGatewayPagamentoException(
+        GatewayPagamentoException exception, HttpServletRequest request
+    ) {
+        return criarErrorResponse(HttpStatus.BAD_REQUEST, exception.getLocalizedMessage(), request.getRequestURI());
     }
 
     @Override
