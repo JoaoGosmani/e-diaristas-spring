@@ -78,7 +78,7 @@ public class DiariaAssembler implements Assembler<DiariaResponse> {
 
     private boolean isAptaParaAvaliacao(DiariaResponse resource) {
         return resource.isConcluido()
-            && !avaliacaoRepository.existsByAvaliadoraAndDiariaId(securityUtils.getUsuarioLogado(), resource.getId());
+            && !avaliacaoRepository.existsByAvaliadorAndDiariaId(securityUtils.getUsuarioLogado(), resource.getId());
     }
     
 }

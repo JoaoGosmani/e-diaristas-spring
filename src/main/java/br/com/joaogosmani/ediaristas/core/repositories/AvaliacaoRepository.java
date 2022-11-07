@@ -41,7 +41,7 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
     )
     boolean isClienteAndDiaristaAvaliaramDiaria(Diaria diaria);
 
-    boolean existsByAvaliadoraAndDiariaId(Usuario avaliador, Long diariaId);
+    boolean existsByAvaliadorAndDiariaId(Usuario avaliador, Long diariaId);
 
     Page<Avaliacao> findByAvaliado(Usuario avaliado, Pageable pageable);
 
