@@ -1,6 +1,5 @@
 package br.com.joaogosmani.ediaristas.api.dtos.responses;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
