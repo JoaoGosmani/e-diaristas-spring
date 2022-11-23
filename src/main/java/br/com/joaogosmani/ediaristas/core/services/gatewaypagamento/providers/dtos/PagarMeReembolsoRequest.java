@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @JsonNaming(SnakeCaseStrategy.class)
 public class PagarMeReembolsoRequest {
     
-private String apiKey;
+    private String apiKey;
+
+    private Integer amount;
 
 }
