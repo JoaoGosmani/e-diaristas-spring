@@ -61,7 +61,7 @@ public class UsuarioController {
             service.cadastrar(cadastroForm);
             attrs.addFlashAttribute("alert", new FlashMessage("alert-success", "Usuário cadastrado com sucesso!"));
         } catch (ValidacaoException e) {
-            result.addError(e.GetFieldError());
+            result.addError(e.getFieldError());
             return "admin/usuario/cadastro-form";
         }    
 
@@ -92,7 +92,7 @@ public class UsuarioController {
             service.editar(edicaoForm, id);
             attrs.addFlashAttribute("alert", new FlashMessage("alert-success", "Usuário editado com sucesso!"));
         } catch (ValidacaoException e) {
-            result.addError(e.GetFieldError());
+            result.addError(e.getFieldError());
             return "admin/usuario/edicao-form";
         }
 
@@ -131,7 +131,7 @@ public class UsuarioController {
             service.alterarSenha(alterarSenhaForm, principal.getName());
             attrs.addFlashAttribute("alert", new FlashMessage("alert-success", "Senha alterada com sucesso!"));
         } catch (ValidacaoException e) {
-            result.addError(e.GetFieldError());
+            result.addError(e.getFieldError());
             return "admin/usuario/alterar-senha";
         }
 

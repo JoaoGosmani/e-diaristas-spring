@@ -11,7 +11,7 @@ public class ValidacaoException extends RuntimeException {
         this.fieldError = fieldError;
     }
 
-    public FieldError GetFieldError() {
+    public FieldError getFieldError() {
         return fieldError;
     }
 

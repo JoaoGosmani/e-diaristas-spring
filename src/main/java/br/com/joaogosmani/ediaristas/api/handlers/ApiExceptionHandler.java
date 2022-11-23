@@ -45,7 +45,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleValidacaoException(ValidacaoException exception) {
         var body = new HashMap<String, List<String>>();
 
-        var fieldError = exception.GetFieldError();
+        var fieldError = exception.getFieldError();
         var fieldErrors = new ArrayList<String>();
 
         fieldErrors.add(fieldError.getDefaultMessage());
