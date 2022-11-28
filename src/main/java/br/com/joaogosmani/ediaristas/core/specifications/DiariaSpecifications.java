@@ -1,6 +1,9 @@
 package br.com.joaogosmani.ediaristas.core.specifications;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.persistence.criteria.JoinType;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -69,6 +72,26 @@ public class DiariaSpecifications {
                 root.get("dataAtendimento"), 
                 LocalDateTime.now().plusHours(24)
             );
+        };
+    }
+
+    public static Specification<Diaria> clienteNomeCompletoContem(String valorBusca) {
+        return (root, query, criteriaBuilder) -> {
+            if (valorBusca == null || valorBusca.isEmpty()) {
+                return criteriaBuilder.and();
+            }
+            var cliente = root.join("cliente", JoinType.LEFT);
+            var nomeCompletoMinusculo = criteriaBuilder.lower(cliente.get("nomeCompleto"));
+            return criteriaBuilder.like(nomeCompletoMinusculo, "%" + valorBusca.toLowerCase() + "%");
+        };
+    }
+
+    public static Specification<Diaria> statusIn(List<DiariaStatus> status) {
+        return (root, query, criteriaBuilder) -> {
+            if (status == null || status.isEmpty()) {
+                return criteriaBuilder.and();
+            }
+            return root.get("status").in(status);
         };
     }
 

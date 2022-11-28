@@ -1,5 +1,7 @@
 package br.com.joaogosmani.ediaristas.web.controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import br.com.joaogosmani.ediaristas.core.enums.DiariaStatus;
 import br.com.joaogosmani.ediaristas.web.services.WebDiariaService;
 
 @Controller
@@ -19,10 +23,13 @@ public class DiariaController {
     private WebDiariaService service;
 
     @GetMapping
-    public ModelAndView buscarDiarias() {
+    public ModelAndView buscarDiarias(
+        @RequestParam(required = false) List<DiariaStatus> status,
+        @RequestParam(required = false, defaultValue = "") String cliente
+    ) {
         var modelAndView = new ModelAndView("admin/diaria/listar");
 
-        modelAndView.addObject("diarias", service.buscarDiarias());
+        modelAndView.addObject("diarias", service.buscarDiarias(cliente, status));
 
         return modelAndView;
     }
