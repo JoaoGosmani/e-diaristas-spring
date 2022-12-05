@@ -11,6 +11,7 @@ import br.com.joaogosmani.ediaristas.api.controllers.CidadesAtendidasRestControl
 import br.com.joaogosmani.ediaristas.api.controllers.DiariaRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.EnderecoDiaristaRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.OportunidadeRestController;
+import br.com.joaogosmani.ediaristas.api.controllers.PagamentoRestController;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioResponse;
 
 @Component
@@ -45,7 +46,18 @@ public class UsuarioAssembler implements Assembler<UsuarioResponse> {
                 .withRel("lista_oportunidades")
                 .withType("GET");
 
-            resource.adicionarLinks(atualizarEnderecoLink, listarEnderecoLink, relacionarCidadesLink, cidadesAtendidasLink, listaOportunidadesLink);
+            var listaPagamentosLink = linkTo(methodOn(PagamentoRestController.class).listarPagamentos())
+                .withRel("lista_pagamentos")
+                .withType("GET");
+
+            resource.adicionarLinks(
+                atualizarEnderecoLink, 
+                listarEnderecoLink, 
+                relacionarCidadesLink, 
+                cidadesAtendidasLink, 
+                listaOportunidadesLink, 
+                listaPagamentosLink
+            );
         }
 
         var listaDiariasLink = linkTo(methodOn(DiariaRestController.class).listarPorUsuarioLogado())
