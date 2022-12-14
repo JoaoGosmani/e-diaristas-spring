@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.joaogosmani.ediaristas.api.dtos.requests.UsuarioRequest;
+import br.com.joaogosmani.ediaristas.api.dtos.responses.MensagemResponse;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.TokenResponse;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioCadastroResponse;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioResponse;
@@ -15,6 +17,7 @@ import br.com.joaogosmani.ediaristas.core.publishers.NovoUsuarioPublisher;
 import br.com.joaogosmani.ediaristas.core.repositories.UsuarioRepository;
 import br.com.joaogosmani.ediaristas.core.services.storage.adapters.StorageService;
 import br.com.joaogosmani.ediaristas.core.services.token.adapters.TokenService;
+import br.com.joaogosmani.ediaristas.core.utils.SecurityUtils;
 import br.com.joaogosmani.ediaristas.core.validators.UsuarioValidator;
 
 @Service
@@ -41,6 +44,9 @@ public class ApiUsuarioService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private SecurityUtils securityUtils;
+
     public UsuarioResponse cadastrar(UsuarioRequest request) {
         validarConfirmacaoSenha(request);
 
@@ -66,6 +72,14 @@ public class ApiUsuarioService {
         var tokenResponse = gerarTokenResponse(response);
         response.setToken(tokenResponse);
         return response;
+    }
+
+    public MensagemResponse atualizarFotoUsuario(MultipartFile fotoUsuario) {
+        var usuarioLogado = securityUtils.getUsuarioLogado();
+        var foto = storageService.salvar(fotoUsuario);
+        usuarioLogado.setFotoUsuario(foto);
+        repository.save(usuarioLogado);
+        return new MensagemResponse("Foto salva com sucesso!");
     }
 
     private TokenResponse gerarTokenResponse(UsuarioCadastroResponse response) {

@@ -35,6 +35,8 @@ public class UsuarioResponse extends HateoasResponse {
 
     private String chavePix;
 
+    private String fotoUsuario;
+
     @JsonIgnore
     public Boolean isCliente() {
         return tipoUsuario.equals(TipoUsuario.CLIENTE.getId());
