@@ -13,18 +13,20 @@ import br.com.joaogosmani.ediaristas.api.dtos.responses.TokenResponse;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioCadastroResponse;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioResponse;
 import br.com.joaogosmani.ediaristas.api.mappers.ApiUsuarioMapper;
+import br.com.joaogosmani.ediaristas.core.exceptions.SenhaIncorretaException;
 import br.com.joaogosmani.ediaristas.core.exceptions.SenhasNaoConferemException;
 import br.com.joaogosmani.ediaristas.core.models.Usuario;
 import br.com.joaogosmani.ediaristas.core.publishers.NovoUsuarioPublisher;
 import br.com.joaogosmani.ediaristas.core.repositories.UsuarioRepository;
 import br.com.joaogosmani.ediaristas.core.services.storage.adapters.StorageService;
 import br.com.joaogosmani.ediaristas.core.services.token.adapters.TokenService;
+
 import br.com.joaogosmani.ediaristas.core.utils.SecurityUtils;
 import br.com.joaogosmani.ediaristas.core.validators.UsuarioValidator;
 
 @Service
 public class ApiUsuarioService {
-    
+
     @Autowired
     private UsuarioRepository repository;
 
@@ -87,34 +89,61 @@ public class ApiUsuarioService {
     public MensagemResponse atualizar(AtualizarUsuarioRequest request) {
         var usuarioLogado = securityUtils.getUsuarioLogado();
 
-            atualizarInformacoesUsuarioLogado(request, usuarioLogado);
+        atualizarInformacoesUsuarioLogado(request, usuarioLogado);
 
-            validator.validar(usuarioLogado);
+        validator.validar(usuarioLogado);
 
-            repository.save(usuarioLogado);
+        alterarSenha(request, usuarioLogado);
 
-            return new MensagemResponse("Usuário atualizado com sucesso!");
+        repository.save(usuarioLogado);
+
+        return new MensagemResponse("Usuário atualizado com sucesso!");
+    }
+
+    private void alterarSenha(AtualizarUsuarioRequest request, Usuario usuarioLogado) {
+        var hasSenhas = request.getPassword() != null
+            && request.getNewPassword() != null
+            && request.getPasswordConfirmation() != null;
+
+        if (hasSenhas) {
+            verificarSenha(request, usuarioLogado);
+            validarConfirmacaoSenha(request);
+            var novaSenha = request.getNewPassword();
+            var novaSenhaHash = passwordEncoder.encode(novaSenha);
+            usuarioLogado.setSenha(novaSenhaHash);
+        }
+    }
+
+    private void verificarSenha(AtualizarUsuarioRequest request, Usuario usuarioLogado) {
+        var senhaRequest = request.getPassword();
+        var senhaDB = usuarioLogado.getSenha();
+
+        if (!passwordEncoder.matches(senhaRequest, senhaDB)) {
+            var mensagem = "A senha informada está incorreta";
+            var fieldError = new FieldError(request.getClass().getName(), "password", senhaRequest, false, null, null, mensagem);
+            throw new SenhaIncorretaException(mensagem, fieldError);
+        }
     }
 
     private void atualizarInformacoesUsuarioLogado(AtualizarUsuarioRequest request, Usuario usuarioLogado) {
         usuarioLogado.setNomeCompleto(
             request.getNomeCompleto() != null ? request.getNomeCompleto() : usuarioLogado.getNomeCompleto()
         );
-            usuarioLogado.setEmail(
-                request.getEmail() != null ? request.getEmail() : usuarioLogado.getEmail()
-            );
-            usuarioLogado.setCpf(
-                request.getCpf() != null ? request.getCpf() : usuarioLogado.getCpf()
-            );
-            usuarioLogado.setNascimento(
-                request.getNascimento() != null ? request.getNascimento() : usuarioLogado.getNascimento()
-            );
-            usuarioLogado.setTelefone(
-                request.getTelefone() != null ? request.getTelefone() : usuarioLogado.getTelefone()
-            );
-            usuarioLogado.setChavePix(
-                request.getChavePix() != null ? request.getChavePix() : usuarioLogado.getChavePix()
-            );
+        usuarioLogado.setEmail(
+            request.getEmail() != null ? request.getEmail() : usuarioLogado.getEmail()
+        );
+        usuarioLogado.setCpf(
+            request.getCpf() != null ? request.getCpf() : usuarioLogado.getCpf()
+        );
+        usuarioLogado.setNascimento(
+            request.getNascimento() != null ? request.getNascimento() : usuarioLogado.getNascimento()
+        );
+        usuarioLogado.setTelefone(
+            request.getTelefone() != null ? request.getTelefone() : usuarioLogado.getTelefone()
+        );
+        usuarioLogado.setChavePix(
+            request.getChavePix() != null ? request.getChavePix() : usuarioLogado.getChavePix()
+        );
     }
 
     private TokenResponse gerarTokenResponse(UsuarioCadastroResponse response) {
@@ -135,6 +164,18 @@ public class ApiUsuarioService {
 
     private void validarConfirmacaoSenha(UsuarioRequest request) {
         var senha = request.getPassword();
+        var confirmacaoSenha = request.getPasswordConfirmation();
+
+        if (!senha.equals(confirmacaoSenha)) {
+            var mensagem = "Os dois campos de senha não conferem";
+            var fieldError = new FieldError(request.getClass().getName(), "passwordConfirmation", request.getPasswordConfirmation(), false, null, null, mensagem);
+        
+            throw new SenhasNaoConferemException(mensagem, fieldError);
+        }
+    }
+
+    private void validarConfirmacaoSenha(AtualizarUsuarioRequest request) {
+        var senha = request.getNewPassword();
         var confirmacaoSenha = request.getPasswordConfirmation();
 
         if (!senha.equals(confirmacaoSenha)) {
