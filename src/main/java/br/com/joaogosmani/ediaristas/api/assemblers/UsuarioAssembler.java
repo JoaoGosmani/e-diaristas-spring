@@ -12,6 +12,7 @@ import br.com.joaogosmani.ediaristas.api.controllers.DiariaRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.EnderecoDiaristaRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.OportunidadeRestController;
 import br.com.joaogosmani.ediaristas.api.controllers.PagamentoRestController;
+import br.com.joaogosmani.ediaristas.api.controllers.UsuarioRestController;
 import br.com.joaogosmani.ediaristas.api.dtos.responses.UsuarioResponse;
 
 @Component
@@ -64,7 +65,11 @@ public class UsuarioAssembler implements Assembler<UsuarioResponse> {
             .withRel("lista_diarias")
             .withType("GET");
 
-        resource.adicionarLinks(listaDiariasLink);
+        var alterarFotoUsuarioLink = linkTo(methodOn(UsuarioRestController.class).atualizarFotoUsuario(null))
+            .withRel("alterar_foto_usuario")
+            .withType("POST");
+
+        resource.adicionarLinks(listaDiariasLink, alterarFotoUsuarioLink);
     }
 
     @Override
